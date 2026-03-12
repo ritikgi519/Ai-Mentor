@@ -168,11 +168,11 @@ const likeCommunityPost = async (req, res) => {
       likes = [...likes, { userId }];
       // Remove from dislikes if present
       post.dislikes = (post.dislikes || []).filter((d) => d.userId !== userId);
-      post.changed('dislikes', true);
+      post.changed("dislikes", true);
     }
 
     post.likes = likes;
-    post.changed('likes', true);
+    post.changed("likes", true);
     await post.save();
 
     const updated = await CommunityPost.findByPk(post.id, {
