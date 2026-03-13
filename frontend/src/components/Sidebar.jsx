@@ -108,7 +108,7 @@ const Sidebar = ({ activePage = "dashboard" }) => {
               </div>
               <div className="p-2">
                 <button onClick={() => {navigate("/settings"); setProfilePopupOpen(false);}} className="flex items-center w-full px-4 py-4 text-[10px] font-black uppercase text-main hover:bg-teal-500 hover:text-white rounded-[1.5rem] transition-all"><Settings className="w-4 h-4 mr-3" /> {t("header.dashboard_settings")}</button>
-                <button onClick={handleLogout} className="flex items-center w-full px-4 py-4 text-[10px] font-black uppercase text-red-500 hover:bg-red-500 hover:text-white rounded-[1.5rem] transition-all mt-1"><LogOut className="w-4 h-4 mr-3" /> {t("header.end_session")}</button>
+                <button onClick={handleLogout} className="flex items-center w-full px-4 py-4 text-[10px] font-black uppercase text-red-500 hover:bg-red-500 hover:text-white rounded-[1.5rem] transition-all mt-1"><LogOut className="w-4 h-4 mr-3" /> {t("auth.logout")}</button>
               </div>
             </div>
           )}
