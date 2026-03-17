@@ -1,5 +1,7 @@
-// backend/config/cloudinary.js
 import { v2 as cloudinary } from "cloudinary";
+import dotenv from "dotenv";
+
+dotenv.config(); // Yeh line variables load karne ke liye zaroori hai
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,

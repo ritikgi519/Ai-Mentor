@@ -1,3 +1,4 @@
+// frontend/src/components/Sidebar.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -9,7 +10,7 @@ import { useTranslation } from "react-i18next";
 const Sidebar = ({ activePage = "dashboard" }) => {
   const { t } = useTranslation();
   const { sidebarOpen, setSidebarOpen, sidebarCollapsed, setSidebarCollapsed } = useSidebar();
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuth(); // AuthContext se user nikal rahe hain
   const navigate = useNavigate();
   const [navigationItems, setNavigationItems] = useState([]);
   const [profilePopupOpen, setProfilePopupOpen] = useState(false);
@@ -28,6 +29,9 @@ const Sidebar = ({ activePage = "dashboard" }) => {
   };
 
   const displayName = user?.name || user?.email?.split('@')[0] || "User";
+
+  // 🔥 Profile Image logic
+  const profileImage = user?.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(displayName)}`;
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -103,7 +107,7 @@ const Sidebar = ({ activePage = "dashboard" }) => {
           {profilePopupOpen && (
             <div className={`absolute bottom-full mb-6 left-4 right-4 bg-card/95 backdrop-blur-2xl border border-border/50 rounded-[2.5rem] shadow-[0_-20px_80px_rgba(0,0,0,0.3)] overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300 z-[90] ${sidebarCollapsed ? "w-52 -left-2" : ""}`}>
               <div className="p-6 border-b border-border/50 bg-gradient-to-tr from-teal-500/10 to-transparent text-center">
-                 <img src={`https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(displayName)}`} className="w-16 h-16 rounded-[1.5rem] mx-auto mb-3 shadow-2xl border-2 border-card" alt="User" />
+                 <img src={profileImage} className="w-16 h-16 rounded-[1.5rem] mx-auto mb-3 shadow-2xl border-2 border-card object-cover" alt="User" />
                  <h4 className="text-xs font-black text-main uppercase tracking-tighter">{displayName}</h4>
               </div>
               <div className="p-2">
@@ -118,7 +122,7 @@ const Sidebar = ({ activePage = "dashboard" }) => {
             className={`cursor-pointer group relative p-[2px] rounded-[2rem] bg-gradient-to-br from-teal-500/30 via-blue-500/20 to-transparent transition-all duration-500 shadow-lg hover:shadow-teal-500/10 ${profilePopupOpen ? 'ring-2 ring-teal-500' : ''}`}
           >
             <div className={`bg-card dark:bg-slate-900 rounded-[1.9rem] transition-all duration-300 ${sidebarCollapsed ? 'p-1' : 'p-4 flex items-center'}`}>
-              <img src={`https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(displayName)}`} className={`${sidebarCollapsed ? 'w-12 h-12' : 'w-10 h-10'} rounded-[1.2rem] shadow-md border-2 border-white dark:border-slate-800 transition-all`} alt="Avatar" />
+              <img src={profileImage} className={`${sidebarCollapsed ? 'w-12 h-12' : 'w-10 h-10'} rounded-[1.2rem] shadow-md border-2 border-white dark:border-slate-800 transition-all object-cover`} alt="Avatar" />
               {!sidebarCollapsed && (
                 <div className="ml-3 flex-1 min-w-0">
                   <div className="text-[11px] font-black text-main truncate uppercase tracking-tight">{displayName}</div>

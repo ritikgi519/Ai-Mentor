@@ -2,40 +2,26 @@
 import express from "express";
 import multer from "multer";
 import path from "path";
-import {
-  getUserProfile,
-  updateUserProfile,
-  purchaseCourse,
-  updateCourseProgress,
-  getWatchedVideos,
-  getUserSettings,
-  updateUserSettings,
-  removePurchasedCourse,
-} from "../controllers/userController.js";
+import { updateUserProfile, getUserProfile } from "../controllers/userController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+// Multer storage configuration
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
+  destination: (req, file, cb) => {
+    cb(null, "uploads/"); // Ensure karein ki 'uploads' folder backend root mein hai
   },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + ext);
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
 const upload = multer({ storage });
 
+// Profile Route - upload.single("avatar") lagana zaroori hai
 router.route("/profile")
   .get(protect, getUserProfile)
   .put(protect, upload.single("avatar"), updateUserProfile);
-
-router.route("/purchase-course").post(protect, purchaseCourse);
-router.route("/course-progress").put(protect, updateCourseProgress);
-router.route("/watched-videos").get(protect, getWatchedVideos);
-router.route("/settings").get(protect, getUserSettings).put(protect, updateUserSettings);
-router.route("/remove-course").post(protect, removePurchasedCourse);
 
 export default router;

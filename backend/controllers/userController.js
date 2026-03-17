@@ -238,8 +238,8 @@ const updateUserSettings = async (req, res) => {
   }
 };
 
+// @desc Update user profile (including avatar upload/removal)
 const updateUserProfile = async (req, res) => {
-
   try {
     if (!req.user) {
       return res.status(401).json({ message: "Not authorized" });
@@ -250,8 +250,18 @@ const updateUserProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Avatar Upload Handling
-    if (req.file) {
+    // 🔥 1. REMOVE PHOTO LOGIC: Agar frontend se removeAvatar "true" bhej rahe ho
+    if (req.body.removeAvatar === "true") {
+      user.avatar_url = null;
+      user.avatar = null;
+      
+      // Sequelize ko batana padta hai ki field change hui hai taaki UPDATE query chale
+      user.changed('avatar_url', true);
+      user.changed('avatar', true);
+      console.log(`✅ Avatar removed for user: ${user.id}`);
+    } 
+    // 🔥 2. UPLOAD PHOTO LOGIC: Agar nayi file aa rahi hai
+    else if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path, {
         folder: "user_avatars",
         public_id: `user_${user.id}`,
@@ -261,19 +271,22 @@ const updateUserProfile = async (req, res) => {
       user.avatar_url = result.secure_url;
       user.avatar = `/uploads/${req.file.filename}`;
 
-      // delete temp file
-      fs.unlinkSync(req.file.path);
+      // Temp file server se delete karein
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
     }
 
-    // Update text fields
+    // 3. Baki text fields update karein
     user.firstName = req.body.firstName ?? user.firstName;
     user.lastName = req.body.lastName ?? user.lastName;
     user.name = `${user.firstName} ${user.lastName}`.trim();
-    user.email = req.body.email ?? user.email;
+    user.email = req.body.email ?? user.email; // Email update support
     user.bio = req.body.bio ?? user.bio;
 
     await user.save();
 
+    // Fresh user object return karein
     res.status(200).json({
       id: user.id,
       firstName: user.firstName,
@@ -282,12 +295,12 @@ const updateUserProfile = async (req, res) => {
       email: user.email,
       role: user.role,
       bio: user.bio,
-      avatar_url: user.avatar_url,  // 👈 added
+      avatar_url: user.avatar_url, // Updated URL (or null)
       purchasedCourses: user.purchasedCourses,
     });
 
   } catch (error) {
-    console.error("UPDATE PROFILE ERROR:", error);
+    console.error("❌ UPDATE PROFILE ERROR:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

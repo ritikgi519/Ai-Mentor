@@ -15,8 +15,10 @@ const Header = () => {
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
-  // ReferenceError se bachne ke liye displayName ko sabse upar define karein
   const displayName = user?.name || user?.email?.split('@')[0] || "User";
+
+  // ✅ Profile Photo Logic: Pehle database ki URL, fir fallback initials
+  const profilePhoto = user?.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(displayName)}`;
 
   const handleLogout = () => {
     setShowLogoutConfirm(true);
@@ -33,26 +35,21 @@ const Header = () => {
     setDropdownOpen((prev) => !prev);
   };
 
-  // Bahar click karne par dropdown band karne ka logic
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        if (window.innerWidth < 1024) {
-          setSidebarOpen(false); // Mobile par sidebar bhi band karein
-        }
         setDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [setSidebarOpen]);
+  }, []);
 
   return (
     <>
     <header className="bg-card/80 backdrop-blur-xl border-b border-border/50 px-6 py-4 fixed top-0 left-0 right-0 z-[100]">
       <div className="flex items-center justify-between max-w-[1600px] mx-auto">
         
-        {/* Mobile Menu & Logo */}
         <div className="flex items-center space-x-4">
           <button
             className="lg:hidden p-2 rounded-xl bg-card border border-border hover:bg-canvas-alt transition-all"
@@ -62,16 +59,10 @@ const Header = () => {
           </button>
           
           <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate("/dashboard")}>
-            {/* ✅ UPDATED: Yahan purana logo lagaya gaya hai */}
-            <img
-              src="/upto.png"
-              alt="UptoSkills Logo"
-              className="h-10 w-auto"
-            />
+            <img src="/upto.png" alt="UptoSkills Logo" className="h-10 w-auto" />
           </div>
         </div>
 
-        {/* Search Bar (Mobile par hidden) */}
         <div className="flex-1 max-w-md mx-8 hidden md:block">
           <div className="relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-teal-500 transition-colors w-4 h-4" />
@@ -83,7 +74,6 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Action Buttons & Profile */}
         <div className="flex items-center space-x-5">
           <ThemeToggle />
           
@@ -92,16 +82,16 @@ const Header = () => {
             <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-orange-500 rounded-full border-2 border-card" />
           </div>
 
-          {/* PROFILE DROPDOWN SECTION */}
           <div className="relative" ref={dropdownRef}>
             <button 
               onClick={toggleDropdown}
               className="flex items-center space-x-3 p-1 pr-3 rounded-2xl hover:bg-canvas-alt transition-all border border-transparent hover:border-border group"
             >
               <div className="relative">
+                {/* ✅ Small Avatar Updated */}
                 <img
-                  src={`https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(displayName)}`}
-                  className="w-9 h-9 rounded-xl shadow-md border border-border/50 group-hover:border-teal-500 transition-all"
+                  src={profilePhoto}
+                  className="w-9 h-9 rounded-xl shadow-md border border-border/50 group-hover:border-teal-500 transition-all object-cover"
                   alt="Avatar"
                 />
                 <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-card rounded-full" />
@@ -109,14 +99,14 @@ const Header = () => {
               <span className="text-sm font-bold text-main hidden lg:block">{displayName}</span>
             </button>
 
-            {/* Impressive Floating Menu */}
             {dropdownOpen && (
               <div className="absolute right-0 mt-4 w-72 bg-card/95 backdrop-blur-2xl border border-border/50 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] z-[110] overflow-hidden animate-in fade-in zoom-in slide-in-from-top-4 duration-300">
                 <div className="p-6 bg-gradient-to-br from-teal-500/10 via-blue-500/5 to-transparent border-b border-border/50">
                   <div className="flex items-center space-x-4 mb-4">
+                    {/* ✅ Menu Avatar Updated */}
                     <img
-                      src={`https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(displayName)}`}
-                      className="w-14 h-14 rounded-2xl shadow-xl border-2 border-white dark:border-slate-800"
+                      src={profilePhoto}
+                      className="w-14 h-14 rounded-2xl shadow-xl border-2 border-white dark:border-slate-800 object-cover"
                       alt="User"
                     />
                     <div className="min-w-0">
@@ -136,9 +126,7 @@ const Header = () => {
                   <button onClick={() => { navigate("/settings"); setDropdownOpen(false); }} className="flex items-center w-full px-4 py-3.5 text-xs font-bold text-main hover:bg-teal-500 hover:text-white rounded-[1.2rem] transition-all group mt-1">
                     <Settings className="mr-3 w-4 h-4 group-hover:rotate-45 transition-transform" /> {t("nav.settings")}
                   </button>
-                  
                   <div className="my-2 border-t border-border/50 mx-2" />
-                  
                   <button onClick={handleLogout} className="flex items-center w-full px-4 py-3.5 text-xs font-black text-red-500 hover:bg-red-500 hover:text-white rounded-[1.2rem] transition-all group">
                     <LogOut className="mr-3 w-4 h-4 group-hover:translate-x-1 transition-transform" /> {t("auth.logout")}
                   </button>
@@ -149,19 +137,20 @@ const Header = () => {
         </div>
       </div>
     </header>
-      {showLogoutConfirm && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-card border border-border/50 rounded-[2rem] shadow-2xl p-8 w-80 text-center">
-            <LogOut className="w-10 h-10 text-red-500 mx-auto mb-4" />
-            <h3 className="text-sm font-black uppercase tracking-tight text-main mb-2">Logout</h3>
-            <p className="text-xs text-muted mb-6">Are you sure you want to logout?</p>
-            <div className="flex gap-3">
-              <button onClick={() => setShowLogoutConfirm(false)} className="flex-1 py-3 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest border border-border hover:bg-canvas-alt transition-all">Cancel</button>
-              <button onClick={confirmLogout} className="flex-1 py-3 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest bg-red-500 text-white hover:bg-red-600 transition-all">Logout</button>
-            </div>
+
+    {showLogoutConfirm && (
+      <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div className="bg-card border border-border/50 rounded-[2rem] shadow-2xl p-8 w-80 text-center">
+          <LogOut className="w-10 h-10 text-red-500 mx-auto mb-4" />
+          <h3 className="text-sm font-black uppercase tracking-tight text-main mb-2">Logout</h3>
+          <p className="text-xs text-muted mb-6">Are you sure you want to logout?</p>
+          <div className="flex gap-3">
+            <button onClick={() => setShowLogoutConfirm(false)} className="flex-1 py-3 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest border border-border hover:bg-canvas-alt transition-all">Cancel</button>
+            <button onClick={confirmLogout} className="flex-1 py-3 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest bg-red-500 text-white hover:bg-red-600 transition-all">Logout</button>
           </div>
         </div>
-      )}
+      </div>
+    )}
     </>
   );
 };
