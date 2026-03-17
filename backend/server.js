@@ -13,7 +13,9 @@ import analyticsRoutes from "./routes/analyticsRoutes.js";
 import sidebarRoutes from "./routes/sidebarRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import communityRoutes from "./routes/communityRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import "./models/CommunityPost.js";
+import "./models/Notification.js";
 
 dotenv.config();
 
@@ -24,9 +26,10 @@ const app = express();
 
 app.use(express.json());
 
+// Is block ko replace karo:
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://localhost:5174"], // Dono ports allow kar do
     credentials: true,
   })
 );
@@ -51,6 +54,7 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/sidebar", sidebarRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/community", communityRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {
